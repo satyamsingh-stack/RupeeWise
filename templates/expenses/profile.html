@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - RupeeWise{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <i class="bi bi-person-circle"></i> Profile & Settings
+</div>
+
+<div class="row">
+    <!-- User Info -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person"></i> User Information
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ user.first_name|default:user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Account Created:</strong> {{ user.date_joined|date:"d M Y" }}</p>
+                <p><strong>Last Login:</strong> {{ user.last_login|date:"d M Y H:i" }}</p>
+            </div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="card" style="margin-top: 1rem;">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i> Statistics
+            </div>
+            <div class="card-body">
+                <p><strong>Total Expenses:</strong> {{ total_count }}</p>
+                <p><strong>Total Spent:</strong> ₹{{ total_expenses }}</p>
+                <p><strong>This Month:</strong> ₹{{ month_total }}</p>
+                <p><strong>Currency:</strong> {{ currency }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-gear"></i> Preferences
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ profile_form.currency.id_for_label }}" class="form-label">Default Currency</label>
+                        {{ profile_form.currency }}
+                        {% if profile_form.currency.errors %}
+                            <div class="invalid-feedback d-block">{{ profile_form.currency.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">Select your preferred currency for displaying amounts</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Save Preferences
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Help & Info -->
+        <div class="card" style="margin-top: 1rem;">
+            <div class="card-header">
+                <i class="bi bi-info-circle"></i> About RupeeWise
+            </div>
+            <div class="card-body">
+                <p><strong>Made by:</strong> SatyamSingh</p>
+            </div>
+        </div>
+        
+        <!-- Danger Zone -->
+        <div class="card border-danger" style="margin-top: 1rem;">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-exclamation-triangle"></i> Danger Zone
+            </div>
+            <div class="card-body">
+                <p class="mb-3">This section contains actions that cannot be easily undone.</p>
+                <a href="{% url 'logout' %}" class="btn btn-danger">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

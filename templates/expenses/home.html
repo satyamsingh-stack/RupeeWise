@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - RupeeWise{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <i class="bi bi-speedometer2"></i> Dashboard
+</div>
+
+<!-- Statistics Row -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-box">
+            <h3>Today's Spending</h3>
+            <div class="amount">₹{{ today_total }}</div>
+            <small class="text-muted">{{ today_count }} expense(s)</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-box">
+            <h3>This Week</h3>
+            <div class="amount">₹{{ week_total }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-box">
+            <h3>This Month</h3>
+            <div class="amount">₹{{ month_total }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-box">
+            <h3>Average Today</h3>
+            <div class="amount">₹{{ average|floatformat:0 }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12 mb-3">
+        <a href="{% url 'add_expense' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle"></i> Add Expense
+        </a>
+        <a href="{% url 'expense_list' %}" class="btn btn-outline-primary btn-lg">
+            <i class="bi bi-list-ul"></i> View All
+        </a>
+        <a href="{% url 'analytics' %}" class="btn btn-outline-primary btn-lg">
+            <i class="bi bi-graph-up"></i> Analytics
+        </a>
+    </div>
+</div>
+
+<!-- Category Breakdown -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-pie-chart"></i> Category Breakdown (This Month)
+            </div>
+            <div class="card-body">
+                {% if category_breakdown %}
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat in category_breakdown %}
+                                <tr>
+                                    <td>{{ cat.category }}</td>
+                                    <td><strong>₹{{ cat.total }}</strong></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted">No expenses this month</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Frequent Items -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-star"></i> Frequent Items
+            </div>
+            <div class="card-body">
+                {% if frequent_items %}
+                    <ul class="list-group list-group-flush">
+                        {% for item in frequent_items %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ item.description }}</span>
+                                <span class="badge bg-primary rounded-pill">Used</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No frequent items yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Expenses -->
+<div class="row" style="margin-top: 2rem;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history"></i> Recent Expenses (Last 30 Days)
+            </div>
+            <div class="card-body">
+                {% if recent_expenses %}
+                    {% for expense in recent_expenses %}
+                        <div class="expense-item">
+                            <div class="flex-grow-1">
+                                <span class="expense-category">{{ expense.category }}</span>
+                                <strong>{{ expense.description }}</strong><br>
+                                <small class="text-muted">{{ expense.date|date:"d M Y" }}</small>
+                            </div>
+                            <div class="text-end">
+                                <div style="font-size: 1.125rem; font-weight: 600; color: #ef4444;">₹{{ expense.amount }}</div>
+                                <div class="action-buttons mt-2">
+                                    <a href="{% url 'edit_expense' expense.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <a href="{% url 'delete_expense' expense.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No expenses yet. <a href="{% url 'add_expense' %}">Add your first expense!</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

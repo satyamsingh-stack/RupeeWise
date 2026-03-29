@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - RupeeWise{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Category Breakdown Chart
+    const ctxPie = document.getElementById('categoryChart').getContext('2d');
+    new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for cat in category_breakdown %}'{{ cat.category }}',{% endfor %}],
+            datasets: [{
+                data: [{% for cat in category_breakdown %}{{ cat.total }},{% endfor %}],
+                backgroundColor: ['#4f46e5', '#f59e0b', '#ef4444', '#10b981', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899'],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 12 }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Daily Breakdown Chart
+    const ctxLine = document.getElementById('dailyChart').getContext('2d');
+    new Chart(ctxLine, {
+        type: 'line',
+        data: {
+            labels: [{% for day in daily_breakdown %}'{{ day.date|date:"d M" }}',{% endfor %}],
+            datasets: [{
+                label: 'Daily Spending',
+                data: [{% for day in daily_breakdown %}{{ day.total }},{% endfor %}],
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#4f46e5',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { font: { size: 12 } }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 50 }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <i class="bi bi-graph-up"></i> Analytics & Insights
+</div>
+
+<!-- Period Filter -->
+<div class="btn-group-sm" role="group">
+    <a href="?period=today" class="btn {% if period == 'today' %}btn-primary{% else %}btn-outline-primary{% endif %}">Today</a>
+    <a href="?period=week" class="btn {% if period == 'week' %}btn-primary{% else %}btn-outline-primary{% endif %}">This Week</a>
+    <a href="?period=month" class="btn {% if period == 'month' %}btn-primary{% else %}btn-outline-primary{% endif %}">This Month</a>
+    <a href="?period=year" class="btn {% if period == 'year' %}btn-primary{% else %}btn-outline-primary{% endif %}">This Year</a>
+</div>
+
+<!-- Summary Cards -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="stat-box">
+            <h3>Total Spending</h3>
+            <div class="amount">₹{{ total }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-box">
+            <h3>Transactions</h3>
+            <div class="amount">{{ expense_count }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-box">
+            <h3>Average</h3>
+            <div class="amount">₹{{ average|floatformat:0 }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-pie-chart"></i> Category Breakdown
+            </div>
+            <div class="card-body text-center">
+                {% if category_breakdown %}
+                    <canvas id="categoryChart" height="300"></canvas>
+                {% else %}
+                    <p class="text-muted">No data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-graph-up"></i> Daily Spending Trend
+            </div>
+            <div class="card-body">
+                {% if daily_breakdown %}
+                    <canvas id="dailyChart" height="250"></canvas>
+                {% else %}
+                    <p class="text-muted">No data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tables -->
+<div class="row" style="margin-top: 2rem;">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-list-ul"></i> Top Expenses
+            </div>
+            <div class="card-body">
+                {% if top_expenses %}
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exp in top_expenses %}
+                                <tr>
+                                    <td>{{ exp.description }}</td>
+                                    <td><strong>₹{{ exp.amount }}</strong></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted">No data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-star"></i> Frequent Expenses
+            </div>
+            <div class="card-body">
+                {% if frequent_items %}
+                    <ul class="list-group list-group-flush">
+                        {% for item in frequent_items %}
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>{{ item.description }}</span>
+                                <span class="badge bg-primary">Used</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

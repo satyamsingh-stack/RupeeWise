@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}All Expenses - RupeeWise{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <i class="bi bi-list-ul"></i> All Expenses
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="category" class="form-label">Filter by Category</label>
+                <select name="category" id="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="date_filter" class="form-label">Filter by Period</label>
+                <select name="date_filter" id="date_filter" class="form-select">
+                    <option value="all" {% if selected_date_filter == 'all' %}selected{% endif %}>All Time</option>
+                    <option value="today" {% if selected_date_filter == 'today' %}selected{% endif %}>Today</option>
+                    <option value="week" {% if selected_date_filter == 'week' %}selected{% endif %}>This Week</option>
+                    <option value="month" {% if selected_date_filter == 'month' %}selected{% endif %}>This Month</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+                <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Total Summary -->
+<div class="alert alert-info">
+    <strong>Total:</strong> ₹{{ total_sum }}
+</div>
+
+<!-- Expenses Table -->
+<div class="card">
+    <div class="card-body">
+        {% if page_obj %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in page_obj %}
+                            <tr>
+                                <td>{{ expense.date|date:"d M Y" }}</td>
+                                <td>{{ expense.description }}</td>
+                                <td><span class="badge bg-primary">{{ expense.category }}</span></td>
+                                <td><strong>₹{{ expense.amount }}</strong></td>
+                                <td>
+                                    <a href="{% url 'edit_expense' expense.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <a href="{% url 'delete_expense' expense.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <p class="text-muted text-center py-4">No expenses found. <a href="{% url 'add_expense' %}">Add one now!</a></p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="{% url 'add_expense' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-circle"></i> Add New Expense
+    </a>
+</div>
+{% endblock %}
