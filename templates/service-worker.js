@@ -1,6 +1,5 @@
-const CACHE_NAME = 'rupeewise-v1';
+const CACHE_NAME = 'rupeewise-v2';
 const CORE_ASSETS = [
-  '/',
   '/offline.html',
   '/static/css/style.css',
 ];
@@ -23,6 +22,28 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') {
+    return;
+  }
+
+  const requestUrl = new URL(event.request.url);
+
+  // Always go network-first for navigations to avoid stale CSRF tokens.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+          return response;
+        })
+        .catch(() => caches.match('/offline.html'))
+    );
+    return;
+  }
+
+  // Skip caching for auth endpoints to avoid CSRF mismatch.
+  if (requestUrl.pathname.startsWith('/login') || requestUrl.pathname.startsWith('/signup')) {
+    event.respondWith(fetch(event.request));
     return;
   }
 

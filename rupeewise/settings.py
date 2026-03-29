@@ -13,7 +13,10 @@ SECRET_KEY = 'django-insecure-rupeewise-dev-key-change-in-production-2024'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['RupeeWise.pythonanywhere.com']
+ALLOWED_HOSTS = ['*','RupeeWise.pythonanywhere.com']
+
+# Allow HTTPS origins when deployed (e.g., PythonAnywhere)
+CSRF_TRUSTED_ORIGINS = ['https://rupeewise.pythonanywhere.com']
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Application definition
